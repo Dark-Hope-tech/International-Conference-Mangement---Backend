@@ -59,7 +59,7 @@ router.post("/registerStudent",async (req,res) => {
             .cookie("token", token, {
                 httpOnly: true,
             })
-            .send();
+            .send(true);
 
     }catch(err) {
         console.error(err);
@@ -234,10 +234,12 @@ router.post("/enrollCourse", async (req,res) => {
         return res
                 .status(400)
                 .json({errorMessage: "Course already exist"});
-
+        if(user.proffesion=="Teacher"){
+            return res.status(400).json({errorMessage:"Only Student can enroll in a course."})
+        }
         await Student.findByIdAndUpdate({_id: decoded}, {$push: {course: enCourse}} );
 
-        await Course.findOneAndUpdate({id: enCourse}, {$push: {student: user.rollno}} );
+        await Course.findOneAndUpdate({id: enCourse}, {$push: {student: user._id}} );
         
         res.send();         
         

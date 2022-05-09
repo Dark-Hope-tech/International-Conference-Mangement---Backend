@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const Response = require("./assignemntModel")
 const CourseSchema = new mongoose.Schema({
     name: {type:String, required: true},
     id: {type:String, required: true},
@@ -10,8 +10,8 @@ const CourseSchema = new mongoose.Schema({
     teacher: {type: String, required: true},
     link: {type: String, required: false},
     image: {type: String, required: false},
-    student: {type: [String], required: false}
-    // students: {type: Array, required: false}
+    student: {type: [String], required: false},
+    assignemnts: {type:[Response.AssignmentSchema],required: false}
 });
 
 const Course = mongoose.model("Course", CourseSchema);

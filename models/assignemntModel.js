@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
 
-const assignmentSchema = new mongoose.Schema({
-    course: {type: String, required: true},
-    name: {type: String, required: true},
-    description: {type: String, required: true},
-    date: {type: String, required: true},
-    pdf: {type: String, required: true}     
+const ResponseSchema = new mongoose.Schema({
+    student_id:{type:String,required :true},
+    submitted:{type:String,require:true}
 });
-
-const Assignment = mongoose.model("Assignment", assignmentSchema);
+const AssignmentSchema = new mongoose.Schema({
+    course: {type: String, required: true},
+    description:{type:String,required:true},
+    response:{type:[ResponseSchema],require:false}
+});
+const Assignment = mongoose.model("Assignment", AssignmentSchema);
 
 module.exports = Assignment;

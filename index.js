@@ -20,13 +20,14 @@ app.use(cors({
     credentials: true
 }));
 
-mongoose.connect(process.env.MDB_CONNECT, {
+// const StudentAssignments = require("./models/studentAssignmentsModel");
+
+const db=mongoose.connect(process.env.MDB_CONNECT, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
-}).then(console.log("DB Connected "));
+}).then(() => {console.log("DB Connected");});
 
 app.use("/auth", require("./routers/UserRouter"));
-// app.use("/course", require("./routers/CourseRouter"));
-
+app.use("/course", require("./routers/CourseRouter"));
 app.listen(PORT, () => console.log('Server started on port:'+ PORT));

@@ -1,8 +1,11 @@
 const router =  require("express").Router();
 const Course = require("../models/courseModel");
 const jwt = require("jsonwebtoken");
+const app = require('../index');
 const Student = require("../models/studentModel");
 const Announcement = require("../models/announcementModel");
+const Assignment = require("../models/assignemntModel");
+const { updateOne } = require("../models/assignemntModel");
 // const Faq = require("../models/faqModel");
 // const Schedule = require("../models/scheduleModel");
 
@@ -31,9 +34,9 @@ router.post("/AddCoreCourse",async (req,res) => {
         var teacher = await Student.findById(decoded.student);
         var proffesion = teacher.proffesion;
         teacher = teacher.firstName + " " + teacher.lastName;
-        // if(proffesion!== "Teacher"){
-        //     res.send(false).json({error:"Only Teacher can add course"});
-        // }
+        if(proffesion!== "Teacher"){
+            res.send(false).json({error:"Only Teacher can add course"});
+        }
         const NewCourse = new Course({
             name: name,
             id: id,
@@ -55,6 +58,91 @@ router.post("/AddCoreCourse",async (req,res) => {
     }
 });
 
+router.post("/postAssignment",async (req,res) => {
+    try{
+        const{course_id,des} = req.body;
+        const individualCourse = await Course.findById(course_id);
+        if(individualCourse)
+        {
+            // let x = [];
+            // let len = individualCourse.student.lenght;
+            // for(let i=0;i<len;i++)
+            // {
+            //     x.push({
+            //         student_id: individualCourse.student[i],
+            //         submitted: "No"
+            //     });
+            // }
+            let x = individualCourse.student.map(obj => ({
+                student_id: obj,
+                submitted: "No"
+            }));
+            //console.log(x);
+            newAssignment = new Assignment({
+                course: course_id,
+                description:des,
+                response: x
+            });
+            await newAssignment.save();
+        }
+        
+        res.send(true);
+    }
+    catch(err){
+        console.error(err);
+        res
+            .status(401)
+            .json({errorMessage: "Unauthorised"});
+    }
+});
+router.post("/AssignmentStatus",async(req,res)=>{
+    try {
+        const{assign_id,student_id,final_status} = req.body;
+        if(!assign_id)
+            return res
+                .status(400)
+                .json({errorMessage: "Please enter all details"});
+        console.log(assign_id);
+        const existingAssignment = await Assignment.findById(assign_id);
+        if(!existingAssignment)
+            return res
+                .status(400)
+                .json({errorMessage: "Assignment does't exist.."});    
+        
+        var token = req.cookies.token;
+
+        if(!token)
+            return res.json(false);
+        
+        token = token.replace('Bearer','');
+        var decoded = jwt.decode(token);
+        console.log(decoded);
+        var teacher = await Student.findById(decoded.student);
+        var proffesion = teacher.proffesion;
+        teacher = teacher.firstName + " " + teacher.lastName;
+        console.log(teacher);
+        if(proffesion!== "Teacher"){
+            return res.send(false).json({error:"Only Teacher can change status"});
+            
+        }
+        let len=existingAssignment.response.length;
+        for(let i=0;i<len;i++){
+            if (existingAssignment.response[i].student_id===student_id) {
+                console.log(existingAssignment.response[i]);
+                existingAssignment.response[i].submitted = final_status;
+                await existingAssignment.save();
+                //     { student_id: student_id },
+                //     { $set: {submitted:final_status}}
+                // );
+                return res.send(true);
+            }
+        }
+        // return res.send(false);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
+});
 router.get("/GetCoreCourses", async (req,res) => {
     try {
         const getCourses = await Course.find({
@@ -125,7 +213,6 @@ router.get("/getAnnouncements",  async(req, res) => {
             .json({errorMessage: "No announcement"});
     }
 });
-
 router.get("/GetStuCourses", async (req,res) => {
     try {
         var token = req.cookies.token;
@@ -165,5 +252,4 @@ router.get("/GetStuCourses", async (req,res) => {
             .json({errorMessage: "Unauthorised"});
     }
 });
-
 module.exports = router;
