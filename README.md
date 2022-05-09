@@ -26,12 +26,9 @@ This repo is of a web-based application for International Conference Management 
 4. Now install the install dependencies of backend.
     ``` sh
     npm install
-    cd backend
-    npm install
     ```
 5. Now open another instance of Terminal and run backend server 
     ``` sh
-     cd backend
      npm start
     ```
  
